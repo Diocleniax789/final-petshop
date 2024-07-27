@@ -86,6 +86,25 @@ VAR
  existe_art:= false;
  END;
 
+PROCEDURE mostrar_articulos_actualizado;
+VAR
+ f,h: integer;
+ BEGIN
+  for f := 0 to filesize(archivo_articulos) - 1 DO
+   BEGIN
+   seek(archivo_articulos, f);
+   read(archivo_articulos, registro_articulos);
+   write(registro_articulos.categoria,' ',registro_articulos.descripcion);
+   FOR h:= 1 to 2 do
+    begin
+    writeln(registro_articulos.importes[h]);
+    end;
+   writeln();
+   END;
+
+ END;
+
+
 PROCEDURE carga_articulos;
 VAR
  cod_art,f: integer;
@@ -194,6 +213,7 @@ VAR
    writeln('=========================');
    writeln();
    END;
+   mostrar_articulos_actualizado;
    close(archivo_articulos);
    REPEAT
    textcolor(lightcyan);
@@ -344,6 +364,96 @@ VAR
   END;
  END;
 
+FUNCTION porcen(importe,por: real): real;
+VAR
+ resultado: real;
+ BEGIN
+ resultado:= importe * por;
+ porcen:= resultado;
+ END;
+
+
+PROCEDURE actualizar_porcentaje;
+VAR
+ f: integer;
+ cat: char;
+ por,imp_1,imp_2: real;
+ op: string;
+ BEGIN
+ clrscr;
+ textcolor(white);
+ reset(archivo_articulos);
+ IF verificar_estado_archivo_articulos = true THEN
+  BEGIN
+  textcolor(lightred);
+  writeln();
+  writeln('////////////////////////////////////////////////////');
+  writeln('X EL ARCHIVO ARTICULOS ESTA VACIO. INTENTE DESPUES X');
+  writeln('////////////////////////////////////////////////////');
+  writeln();
+  delay(2000);
+  close(archivo_articulos);
+  END
+ ELSE
+  BEGIN
+  REPEAT
+   clrscr;
+   textcolor(white);
+   reset(archivo_articulos);
+   writeln('>>> Ingrese categoria: ');
+   readln(cat);
+   cat:= valida_categoria;
+   writeln();
+   write('>>> Ingrese porcentaje: ');
+   readln(por);
+   seek(archivo_articulos, 0);
+   WHILE NOT eof(archivo_articulos) DO
+    BEGIN
+    read(archivo_articulos,registro_articulos);
+    IF cat = registro_articulos.categoria THEN
+      FOR f:= 1 TO 2 DO
+       BEGIN
+       IF f = 1 THEN
+        BEGIN
+        imp_1:= registro_articulos.importes[f];
+        registro_articulos.importes[f]:= porcen(imp_1,por);
+        seek(archivo_articulos,filepos(archivo_articulos) - 1);
+        write(archivo_articulos,registro_articulos);
+        END
+       ELSE
+        BEGIN
+        imp_2:= registro_articulos.importes[f];
+        registro_articulos.importes[f]:= porcen(imp_2,por);
+        seek(archivo_articulos,filepos(archivo_articulos) - 1);
+        write(archivo_articulos,registro_articulos);
+        END;
+       END;
+       textcolor(lightgreen);
+       writeln('=================================================');
+       writeln('*** Valores de compra y de venta actualizados ***');
+       writeln('=================================================');
+       writeln();
+     END;
+    mostrar_articulos_actualizado;
+    close(archivo_articulos);
+  REPEAT
+  textcolor(lightcyan);
+  write('Desea agregar otro registro[s/n]?: ');
+  readln(op);
+  IF (op <> 's') AND (op <> 'n') THEN
+   BEGIN
+   textcolor(lightred);
+   writeln();
+   writeln('////////////////////////////////////////');
+   writeln('X VALOR INCORRECTO. INGRESE NUEVAMENTE X');
+   writeln('////////////////////////////////////////');
+   writeln();
+   END;
+  UNTIL (op = 's') OR (op = 'n');
+  UNTIL (op = 'n');
+  END;
+ END;
+
 PROCEDURE menu_principal;
 VAR
  op: integer;
@@ -369,9 +479,10 @@ VAR
   2:BEGIN
      carga_proveedores;
     END;
- {  3:BEGIN
+  3:BEGIN
+    actualizar_porcentaje;
     END;
-  4:BEGIN
+{  4:BEGIN
     END;
   5:BEGIN
     END;
