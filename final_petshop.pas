@@ -222,11 +222,12 @@ VAR
  clrscr;
  textcolor(white);
  writeln('1. Cargar articulo.');
- writeln('2. Actualizar porcentaje.');
- writeln('3. Listado de articulos con menor porcentaje.');
- writeln('4. Verificar existencia de un articulo con poco stock.');
- writeln('5. Emitir listado.');
- writeln('6. Salir.');
+ writeln('2. Cargar proveedores.');
+ writeln('3. Actualizar porcentaje.');
+ writeln('4. Listado de articulos con menor porcentaje.');
+ writeln('5. Verificar existencia de un articulo con poco stock.');
+ writeln('6. Emitir listado.');
+ writeln('7. Salir.');
  writeln();
  writeln('-------------------------------');
  write('Seleccione una opcion: ');
@@ -244,7 +245,7 @@ VAR
   5:BEGIN
     END;  }
  END;
- UNTIL (op = 6);
+ UNTIL (op = 7);
  END;
 
 BEGIN
