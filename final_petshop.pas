@@ -213,6 +213,136 @@ VAR
   END;
  END;
 
+FUNCTION verificar_estado_archivo_proveedores(): boolean;
+ BEGIN
+ IF filesize(archivo_proveedores) = 0 THEN
+  verificar_estado_archivo_proveedores:= true
+ ELSE
+  verificar_estado_archivo_proveedores:= false;
+ END;
+
+FUNCTION existe_proveedor(cod_prov: integer): boolean;
+VAR
+ f: boolean;
+ BEGIN
+ f:= false;
+ REPEAT
+ read(archivo_proveedores, registro_proveedores);
+ IF cod_prov = registro_proveedores.codigo_proveedor THEN
+  f:= true;
+ UNTIL eof(archivo_proveedores) OR (f = true);
+ IF f = true THEN
+   existe_proveedor:= true
+ ELSE
+   existe_proveedor:= false;
+ END;
+
+PROCEDURE ordena_archivo_proveedores;
+VAR
+ i,j: integer;
+ reg_aux: proveedores;
+ BEGIN
+ FOR i:= 0 TO filesize(archivo_proveedores) - 2 DO
+  BEGIN
+   FOR j:= i + 1 TO filesize(archivo_proveedores) - 1 DO
+    BEGIN
+    seek(archivo_proveedores, i);
+    read(archivo_proveedores, registro_proveedores);
+    seek(archivo_proveedores, j);
+    read(archivo_proveedores, reg_aux);
+    IF registro_proveedores.codigo_proveedor > reg_aux.codigo_proveedor THEN
+     BEGIN
+     seek(archivo_proveedores, i);
+     read(archivo_proveedores, reg_aux);
+     seek(archivo_proveedores, j);
+     read(archivo_proveedores, registro_proveedores);
+     END;
+    END;
+  END;
+ END;
+
+PROCEDURE carga_proveedores;
+VAR
+ op: string;
+ cod_prov: integer;
+ BEGIN
+ clrscr;
+ textcolor(white);
+ reset(archivo_proveedores);
+ IF verificar_estado_archivo_proveedores = true THEN
+  BEGIN
+  writeln('Como sera el primer registro que vas a agregar, no hara falta la verificacion para ver si se repite');
+  writeln();
+  write('>>> Ingrese codigo de proovedor: ');
+  readln(registro_proveedores.codigo_proveedor);
+  writeln();
+  write('>>> Ingrese nombre y apellido: ');
+  readln(registro_proveedores.nombre_apellido);
+  writeln();
+  write('>>> Ingrese mail: ');
+  readln(registro_proveedores.mail);
+  seek(archivo_proveedores,filesize(archivo_proveedores));
+  write(archivo_proveedores,registro_proveedores);
+  close(archivo_proveedores);
+  writeln();
+  writeln('=========================');
+  writeln('*** REGISTRO GUARDADO ***');
+  writeln('=========================');
+  delay(2000);
+  END
+ ELSE
+  BEGIN
+  REPEAT
+   clrscr;
+   textcolor(white);
+   reset(archivo_proveedores);
+   write('>>> Ingrese codigo de proveedor: ');
+   readln(cod_prov);
+   IF existe_proveedor(cod_prov) = true THEN
+    BEGIN
+    textcolor(lightred);
+    writeln();
+    writeln('/////////////////////////////////////');
+    writeln('X YA EXISTE ESE CODIGO DE PROOVEDOR X');
+    writeln('/////////////////////////////////////');
+    writeln();
+    END
+   ELSE
+    BEGIN
+    registro_proveedores.codigo_proveedor:= cod_prov;
+    writeln();
+    write('>>> Ingrese nombre y apellido: ');
+    readln(registro_proveedores.nombre_apellido);
+    writeln();
+    write('>>> Ingrese mail: ');
+    readln(registro_proveedores.mail);
+    seek(archivo_proveedores,filesize(archivo_proveedores));
+    write(archivo_proveedores,registro_proveedores);
+    ordena_archivo_proveedores;
+    writeln();
+    writeln('=========================');
+    writeln('*** REGISTRO GUARDADO ***');
+    writeln('=========================');
+    writeln();
+    END;
+   close(archivo_proveedores);
+   REPEAT
+   textcolor(lightcyan);
+   write('Desea agregar otro registro[s/n]?: ');
+   readln(op);
+   IF (op <> 's') AND (op <> 'n') THEN
+    BEGIN
+    textcolor(lightred);
+    writeln();
+    writeln('////////////////////////////////////////');
+    writeln('X VALOR INCORRECTO. INGRESE NUEVAMENTE X');
+    writeln('////////////////////////////////////////');
+    writeln();
+    END;
+   UNTIL (op = 's') OR (op = 'n');
+  UNTIL (op = 'n');
+  END;
+ END;
 
 PROCEDURE menu_principal;
 VAR
@@ -222,7 +352,7 @@ VAR
  clrscr;
  textcolor(white);
  writeln('1. Cargar articulo.');
- writeln('2. Cargar proveedores.');
+ writeln('2. Cargar proveedor');
  writeln('3. Actualizar porcentaje.');
  writeln('4. Listado de articulos con menor porcentaje.');
  writeln('5. Verificar existencia de un articulo con poco stock.');
@@ -236,11 +366,14 @@ VAR
   1:BEGIN
     carga_articulos;
     END;
- { 2:BEGIN
+  2:BEGIN
+     carga_proveedores;
     END;
-  3:BEGIN
+ {  3:BEGIN
     END;
   4:BEGIN
+    END;
+  5:BEGIN
     END;
   5:BEGIN
     END;  }
