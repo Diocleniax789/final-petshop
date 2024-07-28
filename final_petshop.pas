@@ -533,6 +533,7 @@ VAR
   BEGIN
   REPEAT
   clrscr;
+  textcolor(white);
   reset(archivo_articulos);
   write('>>> Ingrese codigo de articulo: ');
   readln(cod_art);
@@ -589,7 +590,7 @@ VAR
    END;
    close(archivo_articulos);
   REPEAT
-  textcolor(lightcyan);
+  textcolor(yellow);
   write('Desea agregar otro registro[s/n]?: ');
   readln(op_1);
   IF (op_1 <> 's') AND (op_1 <> 'n') THEN
