@@ -475,8 +475,8 @@ VAR
  ELSE
   BEGIN
   clrscr;
-  writeln('LISTA DE PRODUCTOS CON UN STOCK MENOR QUE EL MINIMO');
-  writeln('---------------------------------------------------');
+  writeln('LISTA DE PRODUCTOS CON UN STOCK MENOR QUE EL MINIMO POR PROVEEDOR');
+  writeln('-----------------------------------------------------------------');
   writeln();
   reset(archivo_articulos);
   reset(archivo_proveedores);
@@ -510,6 +510,102 @@ VAR
   readln();
  END;
 
+PROCEDURE verificar_existencia_articulo_stock;
+VAR
+ op,op_1: string;
+ cod_art,cant: integer;
+ BEGIN
+ clrscr;
+ textcolor(white);
+ reset(archivo_articulos);
+ IF verificar_estado_archivo_articulos = true THEN
+  BEGIN
+  textcolor(lightred);
+  writeln();
+  writeln('////////////////////////////////////////////////////');
+  writeln('X EL ARCHIVO ARTICULOS ESTA VACIO. INTENTE DESPUES X');
+  writeln('////////////////////////////////////////////////////');
+  writeln();
+  delay(2000);
+  close(archivo_articulos);
+  END
+ ELSE
+  BEGIN
+  REPEAT
+  clrscr;
+  reset(archivo_articulos);
+  write('>>> Ingrese codigo de articulo: ');
+  readln(cod_art);
+  IF existe_art(cod_art) = true THEN
+   BEGIN
+   writeln();
+   write('>>> Ingrese cantidad deseada: ');
+   readln(cant);
+   IF cant <= registro_articulos.stock THEN
+    BEGIN
+    writeln();
+    write('>>> Realizar pago[s/n]?: ');
+    readln(op);
+    IF op = 's' THEN
+     BEGIN
+     registro_articulos.stock:= registro_articulos.stock - cant;
+     seek(archivo_articulos,filepos(archivo_articulos) - 1);
+     write(archivo_articulos,registro_articulos);
+     writeln();
+     textcolor(lightgreen);
+     writeln('========================================================');
+     writeln('*** PAGO REALIZADO CON EXITO! GRACIAS POR TU COMPRA! ***');
+     writeln('========================================================');
+     writeln();
+     END
+    ELSE
+     BEGIN
+     textcolor(lightcyan);
+     writeln();
+     writeln('=========================');
+     writeln('& Gracias por su tiempo &');
+     writeln('=========================');
+     writeln();
+     END;
+    END
+   ELSE
+    BEGIN
+    textcolor(lightmagenta);
+    writeln();
+    writeln('||||||||||||||||');
+    writeln('# NO HAY STOCK #');
+    writeln('||||||||||||||||');
+    writeln();
+    END;
+   END
+  ELSE
+   BEGIN
+   textcolor(lightred);
+   writeln();
+   writeln('//////////////////////////');
+   writeln('X NO EXISTE ESE ARTICULO X');
+   writeln('//////////////////////////');
+   writeln();
+   END;
+   close(archivo_articulos);
+  REPEAT
+  textcolor(lightcyan);
+  write('Desea agregar otro registro[s/n]?: ');
+  readln(op_1);
+  IF (op_1 <> 's') AND (op_1 <> 'n') THEN
+   BEGIN
+   textcolor(lightred);
+   writeln();
+   writeln('////////////////////////////////////////');
+   writeln('X VALOR INCORRECTO. INGRESE NUEVAMENTE X');
+   writeln('////////////////////////////////////////');
+   writeln();
+   END;
+  UNTIL (op_1 = 's') OR (op_1 = 'n');
+  UNTIL (op_1 = 'n');
+  END;
+ END;
+
 PROCEDURE menu_principal;
 VAR
  op: integer;
@@ -519,8 +615,8 @@ VAR
  textcolor(white);
  writeln('1. Cargar articulo.');
  writeln('2. Cargar proveedor');
- writeln('3. Actualizar porcentaje.');
- writeln('4. Listado de articulos con menor porcentaje.');
+ writeln('3. Actualizar porcentajes de valores de compra y venta.');
+ writeln('4. Listado de articulos con stock menor al minimo por proveedor.');
  writeln('5. Verificar existencia de un articulo con poco stock.');
  writeln('6. Emitir listado.');
  writeln('7. Salir.');
@@ -541,9 +637,10 @@ VAR
   4:BEGIN
     listado_articulos_menor_stock;
     END;
-{  5:BEGIN
+  5:BEGIN
+    verificar_existencia_articulo_stock;
     END;
-  6:BEGIN
+{  6:BEGIN
     END;  }
  END;
  UNTIL (op = 7);
