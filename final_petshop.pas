@@ -86,7 +86,7 @@ VAR
  existe_art:= false;
  END;
 
-PROCEDURE mostrar_articulos_actualizado;
+{PROCEDURE mostrar_articulos_actualizado;
 VAR
  f,h: integer;
  BEGIN
@@ -102,7 +102,7 @@ VAR
    writeln();
    END;
 
- END;
+ END;    }
 
 
 PROCEDURE carga_articulos;
@@ -213,7 +213,7 @@ VAR
    writeln('=========================');
    writeln();
    END;
-   mostrar_articulos_actualizado;
+  { mostrar_articulos_actualizado; }
    close(archivo_articulos);
    REPEAT
    textcolor(lightcyan);
@@ -434,7 +434,7 @@ VAR
        writeln('=================================================');
        writeln();
      END;
-    mostrar_articulos_actualizado;
+    {mostrar_articulos_actualizado; }
     close(archivo_articulos);
   REPEAT
   textcolor(lightcyan);
@@ -452,6 +452,62 @@ VAR
   UNTIL (op = 's') OR (op = 'n');
   UNTIL (op = 'n');
   END;
+ END;
+
+PROCEDURE listado_articulos_menor_stock;
+VAR
+ codigo_prov: integer;
+ BEGIN
+ clrscr;
+ textcolor(white);
+ reset(archivo_articulos);
+ IF verificar_estado_archivo_articulos = true THEN
+  BEGIN
+  textcolor(lightred);
+  writeln();
+  writeln('////////////////////////////////////////////////////');
+  writeln('X EL ARCHIVO ARTICULOS ESTA VACIO. INTENTE DESPUES X');
+  writeln('////////////////////////////////////////////////////');
+  writeln();
+  delay(2000);
+  close(archivo_articulos);
+  END
+ ELSE
+  BEGIN
+  clrscr;
+  writeln('LISTA DE PRODUCTOS CON UN STOCK MENOR QUE EL MINIMO');
+  writeln('---------------------------------------------------');
+  writeln();
+  reset(archivo_articulos);
+  reset(archivo_proveedores);
+  seek(archivo_proveedores, 0);
+  WHILE NOT eof(archivo_proveedores) DO
+   BEGIN
+   read(archivo_proveedores,registro_proveedores);
+   writeln('NOMBRE PROVEEDOR: ',registro_proveedores.nombre_apellido);
+   codigo_prov:= registro_proveedores.codigo_proveedor;
+   seek(archivo_articulos, 0);
+   WHILE NOT eof(archivo_articulos) DO
+    BEGIN
+    read(archivo_articulos,registro_articulos);
+    IF (codigo_prov = registro_articulos.codigo_proveedor) AND (registro_articulos.stock <= registro_articulos.stock_minimo) THEN
+     BEGIN
+     write('Descipcion articulo: ',registro_articulos.descripcion,' ','Stock actual: ',registro_articulos.stock);
+     writeln();
+     seek(archivo_articulos, filepos(archivo_articulos) - 1);
+     read(archivo_articulos,registro_articulos);
+     END;
+    END;
+   writeln();
+   seek(archivo_proveedores,filepos(archivo_proveedores) - 1);
+   read(archivo_proveedores,registro_proveedores);
+   END;
+  close(archivo_articulos);
+  close(archivo_proveedores);
+  END;
+  writeln();
+  writeln('Presione enter para salir...');
+  readln();
  END;
 
 PROCEDURE menu_principal;
@@ -482,11 +538,12 @@ VAR
   3:BEGIN
     actualizar_porcentaje;
     END;
-{  4:BEGIN
+  4:BEGIN
+    listado_articulos_menor_stock;
     END;
-  5:BEGIN
+{  5:BEGIN
     END;
-  5:BEGIN
+  6:BEGIN
     END;  }
  END;
  UNTIL (op = 7);
