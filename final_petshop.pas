@@ -86,25 +86,6 @@ VAR
  existe_art:= false;
  END;
 
-{PROCEDURE mostrar_articulos_actualizado;
-VAR
- f,h: integer;
- BEGIN
-  for f := 0 to filesize(archivo_articulos) - 1 DO
-   BEGIN
-   seek(archivo_articulos, f);
-   read(archivo_articulos, registro_articulos);
-   write(registro_articulos.categoria,' ',registro_articulos.descripcion);
-   FOR h:= 1 to 2 do
-    begin
-    writeln(registro_articulos.importes[h]);
-    end;
-   writeln();
-   END;
-
- END;    }
-
-
 PROCEDURE carga_articulos;
 VAR
  cod_art,f: integer;
@@ -213,7 +194,6 @@ VAR
    writeln('=========================');
    writeln();
    END;
-  { mostrar_articulos_actualizado; }
    close(archivo_articulos);
    REPEAT
    textcolor(lightcyan);
@@ -372,7 +352,6 @@ VAR
  porcen:= resultado;
  END;
 
-
 PROCEDURE actualizar_porcentaje;
 VAR
  f: integer;
@@ -434,7 +413,6 @@ VAR
        writeln('=================================================');
        writeln();
      END;
-    {mostrar_articulos_actualizado; }
     close(archivo_articulos);
   REPEAT
   textcolor(lightcyan);
