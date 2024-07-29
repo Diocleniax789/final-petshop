@@ -607,6 +607,74 @@ VAR
   END;
  END;
 
+PROCEDURE emitir_listado;
+VAR
+ cod_prov: integer;
+ tot,acum,producto: real;
+ BEGIN
+ clrscr;
+ reset(archivo_articulos);
+ reset(archivo_proveedores);
+ IF (verificar_estado_archivo_articulos = true) AND (verificar_estado_archivo_proveedores = true) THEN
+  BEGIN
+  textcolor(lightred);
+  writeln();
+  writeln('//////////////////////////////////////////////////////////////////////////////////////////////////');
+  writeln('X AL MENOS UNO DE LOS ARCHIVOS <ARTICULOS O PROVEEDORES> ESTA VACIO. POR LO TANTO. INTENTE LUEGO X');
+  writeln('//////////////////////////////////////////////////////////////////////////////////////////////////');
+  delay(2000);
+  close(archivo_articulos);
+  close(archivo_proveedores);
+  END
+ ELSE
+  BEGIN
+  textcolor(white);
+  reset(archivo_proveedores);
+  reset(archivo_articulos);
+  writeln('LISTADO ');
+  seek(archivo_proveedores, 0);
+  tot:= 0;
+  WHILE NOT eof(archivo_proveedores) DO
+   BEGIN
+   writeln('-------------------------------------------------------------------------------------');
+   read(archivo_proveedores,registro_proveedores);
+   write('PROVEEDOR:',registro_proveedores.nombre_apellido,' ','MAIL: ',registro_proveedores.mail);
+   cod_prov:= registro_proveedores.codigo_proveedor;
+   writeln();
+   acum:= 0;
+   seek(archivo_articulos, 0);
+   WHILE NOT eof(archivo_articulos) DO
+    BEGIN
+    read(archivo_articulos,registro_articulos);
+    IF cod_prov = registro_articulos.codigo_proveedor THEN
+     IF registro_articulos.stock < registro_articulos.stock_minimo THEN
+      BEGIN
+      writeln();
+      write('DESCRIPCION ARTICULO: ',registro_articulos.descripcion,' ','CANTIDAD MINIMA A COMPRAR: ',registro_articulos.stock_minimo);
+      writeln();
+      producto:= registro_articulos.stock_minimo * registro_articulos.importes[2];
+      acum:= acum + producto;
+      END;
+    tot:= tot + acum;
+    writeln();
+    seek(archivo_articulos,filepos(archivo_articulos) - 1);
+    read(archivo_articulos,registro_articulos);
+    END;
+  writeln('CANTIDAD TOTAL A COMPRAR: ',acum);
+  writeln();
+  writeln('TOTAL: ',tot);
+  seek(archivo_proveedores,filepos(archivo_proveedores) - 1);
+  read(archivo_proveedores,registro_proveedores);
+  END;
+  close(archivo_articulos);
+  close(archivo_proveedores);
+  writeln();
+  writeln('PULSE ENTER PARA SALIR...');
+  readln();
+  END;
+
+ END;
+
 PROCEDURE menu_principal;
 VAR
  op: integer;
@@ -641,8 +709,9 @@ VAR
   5:BEGIN
     verificar_existencia_articulo_stock;
     END;
-{  6:BEGIN
-    END;  }
+  6:BEGIN
+    emitir_listado;
+    END;
  END;
  UNTIL (op = 7);
  END;
