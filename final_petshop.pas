@@ -682,6 +682,11 @@ VAR
  REPEAT
  clrscr;
  textcolor(white);
+ writeln('SOFTWARE DE GESTION DE PETSHOP');
+ writeln('------------------------------');
+ writeln();
+ writeln('MENU PRINCIPAL');
+ writeln('--------------');
  writeln('1. Cargar articulo.');
  writeln('2. Cargar proveedor');
  writeln('3. Actualizar porcentajes de valores de compra y venta.');
